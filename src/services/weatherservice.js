@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 
-const API_KEY = "1f6fbafabf34a6093680dc0eedf829e4";
+const API_KEY = "2f2121a2f82858e7a801f4b136fae1e5";
 const BASE_URL = "https://api.openweathermap.org/data/2.5";
 
 const getWeatherData = (infoType, searchParams) => {
@@ -10,7 +10,7 @@ const getWeatherData = (infoType, searchParams) => {
   return fetch(url).then((res) => res.json());
 };
 
-const formatCurrentWeather = (data) => {
+const formatCurrentWearher = (data) => {
   const {
     coord: { lat, lon },
     main: { temp, feels_like, temp_min, temp_max, humidity },
@@ -51,7 +51,6 @@ const formatForcastWeather = (data) => {
       icon: d.weather[0].icon,
     };
   });
-
   hourly = hourly.slice(1, 6).map((d) => {
     return {
       title: formatToLocalTime(d.dt, timezone, "hh:mm a"),
@@ -59,39 +58,37 @@ const formatForcastWeather = (data) => {
       icon: d.weather[0].icon,
     };
   });
-  console.log(hourly)
 
   return { timezone, daily, hourly };
 };
 
 const getFormattedWeatherData = async (searchParams) => {
   const formattedCurrentWeather = await getWeatherData(
-    "weather",
+    "waether",
     searchParams
-  ).then(formatCurrentWeather);
+  ).then(formatCurrentWearher);
 
-  const { lat, lon } = formattedCurrentWeather;
+  const { lat, lon } = formatCurrentWearher;
 
-  // to change the units from F to C and C to F
   const formattedForcastWeather = await getWeatherData("onecall", {
     lat,
     lon,
-    exclude: "current,minutely,alerts",
+    exclude: "current, minutely,alerts",
     units: searchParams.units,
   }).then(formatForcastWeather);
 
   return { ...formattedCurrentWeather, ...formattedForcastWeather };
 };
 
-// using luxon
 const formatToLocalTime = (
   secs,
   zone,
-  format = "cccc, dd LLL yyyy' | Localtime: 'hh:mm a"
+  format = "cccc, dd LLL yyyy' | Local time: 'hh:mm a"
 ) => DateTime.fromSeconds(secs).setZone(zone).toFormat(format);
 
 const iconUrlFromCode = (code) =>
   `http://openweathermap.org/img/wn/${code}@2x.png`;
 
 export default getFormattedWeatherData;
+
 export { formatToLocalTime, iconUrlFromCode };
